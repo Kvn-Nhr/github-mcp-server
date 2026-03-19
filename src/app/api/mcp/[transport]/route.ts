@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { createMcpHandler } from "mcp-handler/nextjs";
+import { createMcpHandler } from "mcp-handler/next";
 import { z } from "zod";
 import { Octokit } from "@octokit/rest";
 
