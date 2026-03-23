@@ -54,12 +54,12 @@ const handler = createMcpHandler(
           owner: z.string().describe("Repository owner"),
           repo: z.string().describe("Repository name"),
           path: z.string().describe("File path to create or update"),
-          fileContent: z.string().describe("File content"),  // ← renommé pour éviter le conflit avec la réponse MCP
+          content: z.string().describe("File content"),
           message: z.string().describe("Commit message"),
           branch: z.string().default("main").describe("Branch name"),
         },
       },
-      async ({ owner, repo, path, fileContent, message, branch }) => {
+      async ({ owner, repo, path, content, message, branch }) => {
         let sha: string | undefined;
         try {
           const { data } = await octokit.repos.getContent({
@@ -78,7 +78,7 @@ const handler = createMcpHandler(
           path,
           branch,
           message,
-          content: Buffer.from(fileContent).toString("base64"),  // ← adapté
+          content: Buffer.from(content).toString("base64"),
           sha,
           committer: {
             name: "thehydrowave",
