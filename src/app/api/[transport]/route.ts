@@ -54,12 +54,12 @@ const handler = createMcpHandler(
           owner: z.string().describe("Repository owner"),
           repo: z.string().describe("Repository name"),
           path: z.string().describe("File path to create or update"),
-          content: z.string().describe("File content"),
+          fileContent: z.string().describe("File content"),  // ← renommé pour éviter le conflit avec la réponse MCP
           message: z.string().describe("Commit message"),
           branch: z.string().default("main").describe("Branch name"),
         },
       },
-      async ({ owner, repo, path, content, message, branch }) => {
+      async ({ owner, repo, path, fileContent, message, branch }) => {
         let sha: string | undefined;
         try {
           const { data } = await octokit.repos.getContent({
@@ -78,7 +78,7 @@ const handler = createMcpHandler(
           path,
           branch,
           message,
-          content: Buffer.from(content).toString("base64"),
+          content: Buffer.from(fileContent).toString("base64"),  // ← adapté
           sha,
           committer: {
             name: "thehydrowave",
@@ -110,32 +110,38 @@ const handler = createMcpHandler(
         },
       },
       async ({ owner, repo, path, message, branch }) => {
-        const { data: fileData } = await octokit.repos.getContent({
-          owner,
-          repo,
-          path,
-          ref: branch,
-        });
-        if (Array.isArray(fileData)) {
+        try {
+          const { data: fileData } = await octokit.repos.getContent({
+            owner,
+            repo,
+            path,
+            ref: branch,
+          });
+          if (Array.isArray(fileData)) {
+            return {
+              content: [{ type: "text" as const, text: "Cannot delete a directory" }],
+            };
+          }
+          await octokit.repos.deleteFile({
+            owner,
+            repo,
+            path,
+            message,
+            sha: fileData.sha,
+            branch,
+            committer: {
+              name: "thehydrowave",
+              email: "thehydrowave@users.noreply.github.com",
+            },
+          });
           return {
-            content: [{ type: "text" as const, text: "Cannot delete a directory" }],
+            content: [{ type: "text" as const, text: `Deleted: ${path}` }],
+          };
+        } catch (err: any) {
+          return {
+            content: [{ type: "text" as const, text: `Error deleting file: ${err.message}` }],
           };
         }
-        await octokit.repos.deleteFile({
-          owner,
-          repo,
-          path,
-          message,
-          sha: fileData.sha,
-          branch,
-          committer: {
-            name: "thehydrowave",
-            email: "thehydrowave@users.noreply.github.com",
-          },
-        });
-        return {
-          content: [{ type: "text" as const, text: `Deleted: ${path}` }],
-        };
       }
     );
 
