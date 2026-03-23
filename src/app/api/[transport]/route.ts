@@ -81,8 +81,8 @@ const handler = createMcpHandler(
           content: Buffer.from(content).toString("base64"),
           sha,
           committer: {
-            name: "thehydrowave",
-            email: "thehydrowave@users.noreply.github.com",
+            name: "Kvn-Nhr",
+            email: "Kvn-Nhr@users.noreply.github.com",
           },
         });
         return {
@@ -130,8 +130,8 @@ const handler = createMcpHandler(
             sha: fileData.sha,
             branch,
             committer: {
-              name: "thehydrowave",
-              email: "thehydrowave@users.noreply.github.com",
+              name: "Kvn-Nhr",
+              email: "Kvn-Nhr@users.noreply.github.com",
             },
           });
           return {
